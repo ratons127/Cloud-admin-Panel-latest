@@ -8,6 +8,7 @@
             <v-card-text>
               <v-alert v-if="message" :type="alertType" density="compact">{{ message }}</v-alert>
               <div v-if="!isAuthenticated" class="invite-note">
+<<<<<<< HEAD
                 Set a password to accept the invitation.
               </div>
               <div v-if="!isAuthenticated" class="invite-form">
@@ -34,16 +35,28 @@
               <v-btn v-if="!isAuthenticated" variant="text" @click="goLogin">Back to sign in</v-btn>
               <v-spacer></v-spacer>
               <v-btn v-if="!isAuthenticated" color="primary" @click="acceptInvitePublic" :disabled="processing">Accept invitation</v-btn>
+=======
+                Please sign in to accept the invitation.
+              </div>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
               <v-btn v-if="status === 'success'" color="primary" @click="goHome">Go to dashboard</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
+<<<<<<< HEAD
+=======
+      <Login v-if="!isAuthenticated" />
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
     </v-container>
   </v-main>
 </template>
 
 <script>
+<<<<<<< HEAD
 import authApi from '../../api/auth'
 
 export default {
@@ -56,6 +69,20 @@ export default {
     password: '',
     confirmPassword: '',
     hasAccount: false
+=======
+import Login from './Login'
+
+export default {
+  name: 'InviteAccept',
+  components: {
+    Login
+  },
+  data: () => ({
+    status: 'idle',
+    message: 'Waiting for sign in...',
+    processing: false,
+    completed: false
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
   }),
   computed: {
     isAuthenticated() {
@@ -68,9 +95,12 @@ export default {
   created() {
     if (this.isAuthenticated) {
       this.acceptInvite()
+<<<<<<< HEAD
     } else {
       this.status = 'idle'
       this.message = 'Enter a password to accept the invitation.'
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
     }
   },
   watch: {
@@ -109,6 +139,7 @@ export default {
           this.processing = false
         })
     },
+<<<<<<< HEAD
     acceptInvitePublic() {
       if (this.processing || this.completed) {
         return
@@ -156,6 +187,10 @@ export default {
     },
     goLogin() {
       this.$router.push('/')
+=======
+    goHome() {
+      this.$router.push('/')
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
     }
   }
 }
@@ -168,7 +203,10 @@ export default {
 .invite-note {
   margin-top: 10px;
 }
+<<<<<<< HEAD
 .invite-form {
   margin-top: 10px;
 }
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 </style>

@@ -11,11 +11,14 @@ export default {
       .then((response) => cb(response))
       .catch((err) => errorCb(err))
   },
+<<<<<<< HEAD
   acceptInvite(serverPath, payload, cb, errorCb) {
     http.post(`${serverPath}/auth/invite/accept`, payload)
       .then((response) => cb(response))
       .catch((err) => errorCb(err))
   },
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
   login(serverPath, payload, cb, errorCb) {
     http.post(`${serverPath}/auth/login`, payload)
       .then((response) => cb(response))
@@ -26,6 +29,7 @@ export default {
       .then((response) => cb(response))
       .catch((err) => errorCb(err))
   },
+<<<<<<< HEAD
   forgot(serverPath, payload, cb, errorCb) {
     http.post(`${serverPath}/auth/forgot`, payload)
       .then((response) => cb(response))
@@ -36,6 +40,8 @@ export default {
       .then((response) => cb(response))
       .catch((err) => errorCb(err))
   },
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
   logout(serverPath, payload, cb, errorCb) {
     http.post(`${serverPath}/auth/logout`, payload)
       .then((response) => cb(response))

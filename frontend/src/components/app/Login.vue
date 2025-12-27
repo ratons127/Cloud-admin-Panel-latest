@@ -1,6 +1,7 @@
 <template>
   <v-container class="login-container" fluid>
     <v-row justify="center">
+<<<<<<< HEAD
       <v-col cols="12" sm="10" md="6" lg="4">
         <v-card class="login-card">
           <v-card-title class="login-header">
@@ -9,6 +10,11 @@
             </div>
             <div class="headline login-title">{{ mode === 'login' ? 'Sign in' : 'Create account' }}</div>
           </v-card-title>
+=======
+      <v-col cols="12" sm="8" md="5">
+        <v-card>
+          <v-card-title class="headline">{{ mode === 'login' ? 'Sign in' : 'Create account' }}</v-card-title>
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
           <v-card-text>
             <v-text-field
               v-model="email"
@@ -24,11 +30,14 @@
               autocomplete="current-password"
               variant="outlined"
             ></v-text-field>
+<<<<<<< HEAD
             <div v-if="mode === 'login'" class="oauth-row">
               <v-btn class="login-google" variant="outlined" @click="googleLogin">
                 Continue with Google
               </v-btn>
             </div>
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
             <v-text-field
               v-if="mode === 'signup'"
               v-model="tenantName"
@@ -39,6 +48,7 @@
             <v-alert v-if="successMessage" type="success" density="compact">{{ successMessage }}</v-alert>
           </v-card-text>
           <v-card-actions>
+<<<<<<< HEAD
             <v-btn variant="text" class="login-link" @click="toggleMode">
               {{ mode === 'login' ? 'Create an account' : 'Back to sign in' }}
             </v-btn>
@@ -47,6 +57,13 @@
             </v-btn>
             <v-spacer></v-spacer>
             <v-btn class="login-primary" @click="submit">{{ mode === 'login' ? 'Sign in' : 'Sign up' }}</v-btn>
+=======
+            <v-btn variant="text" @click="toggleMode">
+              {{ mode === 'login' ? 'Create an account' : 'Back to sign in' }}
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="submit">{{ mode === 'login' ? 'Sign in' : 'Sign up' }}</v-btn>
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
           </v-card-actions>
         </v-card>
       </v-col>
@@ -67,9 +84,12 @@ export default {
   computed: {
     errorMessage() {
       return this.$store.state.auth.authError
+<<<<<<< HEAD
     },
     serverPath() {
       return this.$store.state.core.serverPath || `${location.protocol}//${location.hostname+(location.port ? ':' + location.port : '')}`
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
     }
   },
   methods: {
@@ -91,12 +111,15 @@ export default {
           })
           .catch(() => {})
       }
+<<<<<<< HEAD
     },
     forgotPassword() {
       this.$router.push('/forgot')
     },
     googleLogin() {
       window.location.href = `${this.serverPath}/auth/google`
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
     }
   }
 }
@@ -104,6 +127,7 @@ export default {
 
 <style>
 .login-container {
+<<<<<<< HEAD
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -173,5 +197,8 @@ export default {
   .login-primary {
     width: 100%;
   }
+=======
+  padding-top: 60px;
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 }
 </style>

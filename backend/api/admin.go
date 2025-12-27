@@ -149,7 +149,11 @@ func CreateUser(c echo.Context) error {
 	}
 	defer tx.Rollback()
 
+<<<<<<< HEAD
 	if _, err := tx.Exec(`INSERT INTO users (id, email, password_hash, is_super_admin, email_verified) VALUES ($1,$2,$3,$4,TRUE)`,
+=======
+	if _, err := tx.Exec(`INSERT INTO users (id, email, password_hash, is_super_admin) VALUES ($1,$2,$3,$4)`,
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 		userID, email, hash, req.IsSuperAdmin); err != nil {
 		return c.JSON(http.StatusBadRequest, utils.SendError("format_error", "email already exists"))
 	}
@@ -787,11 +791,15 @@ func sendPasswordEmail(email, password string) error {
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 	loginURL := strings.TrimRight(os.Getenv("APP_BASE_URL"), "/")
 	if loginURL != "" {
 		loginURL = loginURL + "/"
 	}
 	body := "Your temporary password is: " + password + "\nLogin: " + loginURL + "\nPlease log in and change it."
+=======
+	body := "Your temporary password is: " + password + "\nPlease log in and change it."
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 	return utils.SendEmail(cfg, email, "Your AWS Admin password reset", body)
 }
 

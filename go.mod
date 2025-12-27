@@ -12,7 +12,10 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	golang.org/x/crypto v0.0.0-20200420201142-3c4aac89819a
 	golang.org/x/net v0.0.0-20200421231249-e086a090c8fd // indirect
+<<<<<<< HEAD
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 	golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0

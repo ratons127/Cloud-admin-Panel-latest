@@ -80,11 +80,14 @@ func routes(e *echo.Echo, cfg *model.Config) {
 	e.POST("/auth/signup", api.Signup)
 	e.GET("/auth/verify", api.VerifyEmail)
 	e.POST("/auth/login", api.Login)
+<<<<<<< HEAD
 	e.GET("/auth/google", api.GoogleLogin)
 	e.GET("/auth/google/callback", api.GoogleCallback)
 	e.POST("/auth/invite/accept", api.AcceptInvitePublic)
 	e.POST("/auth/forgot", api.ForgotPassword)
 	e.POST("/auth/reset", api.ResetPassword)
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 	e.POST("/auth/refresh", api.Refresh)
 	e.POST("/auth/logout", api.Logout)
 	e.GET("/auth/me", api.Me, awsMiddleware.RequireAuth)
@@ -232,12 +235,18 @@ func routes(e *echo.Echo, cfg *model.Config) {
 		e.Group("/js/app.js", middleware.StaticWithConfig(middleware.StaticConfig{
 			Root:   "dist",
 			Browse: false,
+<<<<<<< HEAD
 			HTML5:  true,
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 		}))
 		e.Group("/*", middleware.StaticWithConfig(middleware.StaticConfig{
 			Root:   "dist",
 			Browse: false,
+<<<<<<< HEAD
 			HTML5:  true,
+=======
+>>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 		}))
 	}
 }
