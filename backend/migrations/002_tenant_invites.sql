@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS tenant_invites (
+  token_hash TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  role TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

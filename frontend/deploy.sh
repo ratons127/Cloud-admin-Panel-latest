@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+set -e
+
+rm -rf ./dist
+
+export NODE_ENV=production
+mkdir -p api
+mv ./src/api/* ./api/
+cp ./demo/* ./src/api/
+
+npm run build -- --mode github
+
+cd dist
+
+git init
+git add -A
+git commit -m 'deploy'
+
+git push -f git@github.com:bertrandmartel/aws-admin.git master:gh-pages
+
+cp ./api/* ./src/api/
+rm -rf ./api
