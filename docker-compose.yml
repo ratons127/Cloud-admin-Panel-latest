@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    container_name: cloud-admin-db
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app_pass
+      POSTGRES_DB: app_db
+    volumes:
+      - cloud_admin_pgdata:/var/lib/postgresql/data
+    networks:
+      - cloud-admin-net
+
+  app:
+    build: .
+    image: cloud-admin-panel:latest
+    container_name: cloud-admin
+    depends_on:
+      - db
+    ports:
+      - "6006:6005"
+    environment:
+      DB_URL: "postgres://app:app_pass@db:5432/app_db?sslmode=disable"
+      JWT_SECRET: "your-32+char-secret"
+      APP_BASE_URL: "http://localhost:6006"
+      APP_ENV: "production"
+      SUPER_ADMIN_EMAILS: "admin@example.com"
+      SMTP_HOST: "smtp.gmail.com"
+      SMTP_PORT: "587"
+      SMTP_USER: "betopiacloud@gmail.com"
+      SMTP_PASS: "rgnc twpv xdhi fgws"
+      SMTP_FROM: "betopiacloud@gmail.com"
+      GOOGLE_CLIENT_ID: "rgnc twpv xdhi fgws"
+      GOOGLE_CLIENT_SECRET: "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"
+      GOOGLE_REDIRECT_URL: "http://localhost:6006/auth/google/callback"
+      GOOGLE_AUTO_CREATE: "false"
+    networks:
+      - cloud-admin-net
+
+volumes:
+  cloud_admin_pgdata:
+
+networks:
+  cloud-admin-net:

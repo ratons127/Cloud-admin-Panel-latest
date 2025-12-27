@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS oauth_states (
+  token_hash TEXT PRIMARY KEY,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

@@ -1,0 +1,15 @@
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS is_super_admin BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id TEXT PRIMARY KEY,
+  actor_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  actor_email TEXT NOT NULL,
+  tenant_id TEXT REFERENCES tenants(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT,
+  details JSONB,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
