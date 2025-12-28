@@ -271,10 +271,29 @@ export default {
     },
     createUser() {
       if (!this.isSuperAdmin) return
-      adminApi.createUser(this.serverPath, this.newUser, () => {
+      const email = (this.newUser.email || '').trim()
+      if (!email) {
+        this.$store.dispatch('core/dispatchMessage', { color: 'error', message: 'Email is required.' })
+        return
+      }
+      const password = (this.newUser.password || '').trim()
+      if (this.newUser.sendEmail) {
+        if (password && password.length < 8) {
+          this.$store.dispatch('core/dispatchMessage', { color: 'error', message: 'Password must be at least 8 characters.' })
+          return
+        }
+      } else if (!password || password.length < 8) {
+        this.$store.dispatch('core/dispatchMessage', { color: 'error', message: 'Password (min 8) is required or enable Send email.' })
+        return
+      }
+      adminApi.createUser(this.serverPath, { ...this.newUser, email }, () => {
         this.newUser = { email: '', password: '', isSuperAdmin: false, sendEmail: false }
+        this.$store.dispatch('core/dispatchMessage', { color: 'success', message: 'User created.' })
         this.loadUsers()
-      }, () => {})
+      }, (err) => {
+        const message = err?.response?.data?.message || 'Failed to create user.'
+        this.$store.dispatch('core/dispatchMessage', { color: 'error', message })
+      })
     },
     toggleUserDisabled(user) {
       if (!this.isSuperAdmin) return

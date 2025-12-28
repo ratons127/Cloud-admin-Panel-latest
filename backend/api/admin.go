@@ -3,7 +3,9 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -145,22 +147,29 @@ func CreateUser(c echo.Context) error {
 	userID := uuid.NewV4().String()
 	tx, err := db.Conn.Begin()
 	if err != nil {
+		log.Printf("[admin] create user: begin tx failed: %v", err)
 		return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "db transaction failed"))
 	}
 	defer tx.Rollback()
 
-<<<<<<< HEAD
 	if _, err := tx.Exec(`INSERT INTO users (id, email, password_hash, is_super_admin, email_verified) VALUES ($1,$2,$3,$4,TRUE)`,
-=======
-	if _, err := tx.Exec(`INSERT INTO users (id, email, password_hash, is_super_admin) VALUES ($1,$2,$3,$4)`,
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 		userID, email, hash, req.IsSuperAdmin); err != nil {
+		log.Printf("[admin] create user: insert users failed for %s: %v", email, err)
 		return c.JSON(http.StatusBadRequest, utils.SendError("format_error", "email already exists"))
 	}
 	if _, err := tx.Exec(`INSERT INTO user_settings (user_id, region) VALUES ($1,$2)`, userID, cfg.DefaultRegion); err != nil {
+		log.Printf("[admin] create user: insert user_settings failed for %s (region=%s): %v", email, cfg.DefaultRegion, err)
 		return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to create settings"))
 	}
-	if strings.TrimSpace(req.TenantID) != "" {
+	tenantID := strings.TrimSpace(req.TenantID)
+	if tenantID == "" {
+		if val := c.Get(middleware.ContextTenantID); val != nil {
+			if ctxTenantID, ok := val.(string); ok {
+				tenantID = strings.TrimSpace(ctxTenantID)
+			}
+		}
+	}
+	if tenantID != "" {
 		role := strings.TrimSpace(req.Role)
 		if role == "" {
 			role = "member"
@@ -168,23 +177,25 @@ func CreateUser(c echo.Context) error {
 		if !isValidRole(role) {
 			return c.JSON(http.StatusBadRequest, utils.SendError("format_error", "role must be owner, admin, or member"))
 		}
-		if _, err := tx.Exec(`INSERT INTO memberships (user_id, tenant_id, role) VALUES ($1,$2,$3) ON CONFLICT DO UPDATE SET role = EXCLUDED.role`,
-			userID, req.TenantID, role); err != nil {
+		if _, err := tx.Exec(`INSERT INTO memberships (user_id, tenant_id, role) VALUES ($1,$2,$3) ON CONFLICT (user_id, tenant_id) DO UPDATE SET role = EXCLUDED.role`,
+			userID, tenantID, role); err != nil {
+			log.Printf("[admin] create user: insert membership failed for %s (tenant=%s role=%s): %v", email, tenantID, role, err)
 			return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to add membership"))
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
+		log.Printf("[admin] create user: commit failed for %s: %v", email, err)
 		return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to commit user"))
 	}
 
 	if req.SendEmail {
-		if err := sendPasswordEmail(email, password); err != nil {
-			return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to send email"))
+		if err := sendPasswordEmail(email, password, true); err != nil {
+			log.Printf("[admin] failed to send welcome email to %s: %v", email, err)
 		}
 	}
 
-	logAdminAction(c, "user_created", "user", userID, req.TenantID, map[string]interface{}{"email": email})
+	logAdminAction(c, "user_created", "user", userID, tenantID, map[string]interface{}{"email": email})
 	return c.JSON(http.StatusCreated, map[string]string{"id": userID})
 }
 
@@ -246,15 +257,15 @@ func ResetUserPassword(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to hash password"))
 	}
-	if _, err := db.Conn.Exec(`UPDATE users SET password_hash = $1 WHERE id = $2`, hash, userID); err != nil {
+	if _, err := db.Conn.Exec(`UPDATE users SET password_hash = $1, email_verified = TRUE WHERE id = $2`, hash, userID); err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to update password"))
 	}
 
 	if req.SendEmail {
 		var email string
 		if err := db.Conn.QueryRow(`SELECT email FROM users WHERE id = $1`, userID).Scan(&email); err == nil {
-			if err := sendPasswordEmail(email, password); err != nil {
-				return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to send email"))
+			if err := sendPasswordEmail(email, password, false); err != nil {
+				log.Printf("[admin] failed to send reset email to %s: %v", email, err)
 			}
 		}
 	}
@@ -632,13 +643,13 @@ func addTenantMember(c echo.Context, tenantID string) error {
 				return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "db transaction failed"))
 			}
 			defer tx.Rollback()
-			if _, err := tx.Exec(`INSERT INTO users (id, email, password_hash) VALUES ($1,$2,$3)`, userID, email, hash); err != nil {
+			if _, err := tx.Exec(`INSERT INTO users (id, email, password_hash, email_verified) VALUES ($1,$2,$3,TRUE)`, userID, email, hash); err != nil {
 				return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to create user"))
 			}
 			if _, err := tx.Exec(`INSERT INTO user_settings (user_id, region) VALUES ($1,$2)`, userID, cfg.DefaultRegion); err != nil {
 				return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to create settings"))
 			}
-			if _, err := tx.Exec(`INSERT INTO memberships (user_id, tenant_id, role) VALUES ($1,$2,$3) ON CONFLICT DO UPDATE SET role = EXCLUDED.role`,
+			if _, err := tx.Exec(`INSERT INTO memberships (user_id, tenant_id, role) VALUES ($1,$2,$3) ON CONFLICT (user_id, tenant_id) DO UPDATE SET role = EXCLUDED.role`,
 				userID, tenantID, role); err != nil {
 				return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to add membership"))
 			}
@@ -646,7 +657,7 @@ func addTenantMember(c echo.Context, tenantID string) error {
 				return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to commit member"))
 			}
 			if req.SendEmail {
-				_ = sendPasswordEmail(email, password)
+				_ = sendPasswordEmail(email, password, true)
 			}
 			logAdminAction(c, "tenant_member_created", "membership", userID, tenantID, map[string]interface{}{
 				"email": email,
@@ -658,7 +669,7 @@ func addTenantMember(c echo.Context, tenantID string) error {
 		}
 	}
 
-	if _, err := db.Conn.Exec(`INSERT INTO memberships (user_id, tenant_id, role) VALUES ($1,$2,$3) ON CONFLICT DO UPDATE SET role = EXCLUDED.role`,
+	if _, err := db.Conn.Exec(`INSERT INTO memberships (user_id, tenant_id, role) VALUES ($1,$2,$3) ON CONFLICT (user_id, tenant_id) DO UPDATE SET role = EXCLUDED.role`,
 		userID, tenantID, role); err != nil {
 		return c.JSON(http.StatusInternalServerError, utils.SendError("internal_error", "failed to add membership"))
 	}
@@ -786,21 +797,43 @@ func logAdminAction(c echo.Context, action, entityType, entityID, tenantID strin
 	_ = store.LogAudit(db, actorID, actorEmail, action, entityType, entityID, tenantID, details)
 }
 
-func sendPasswordEmail(email, password string) error {
+func sendPasswordEmail(email, password string, isNewUser bool) error {
 	cfg, err := utils.LoadEmailConfig()
 	if err != nil {
 		return err
 	}
-<<<<<<< HEAD
-	loginURL := strings.TrimRight(os.Getenv("APP_BASE_URL"), "/")
-	if loginURL != "" {
-		loginURL = loginURL + "/"
+	loginURL := buildLoginURL()
+	var subject string
+	var bodyLines []string
+	if isNewUser {
+		subject = "Welcome to AWS Admin"
+		bodyLines = []string{
+			"Welcome to AWS Admin!",
+			"",
+			"Your account has been created by an administrator.",
+			"Your temporary password is: " + password,
+		}
+	} else {
+		subject = "Your AWS Admin password reset"
+		bodyLines = []string{
+			"Your AWS Admin password was reset by an administrator.",
+			"Your temporary password is: " + password,
+		}
 	}
-	body := "Your temporary password is: " + password + "\nLogin: " + loginURL + "\nPlease log in and change it."
-=======
-	body := "Your temporary password is: " + password + "\nPlease log in and change it."
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
-	return utils.SendEmail(cfg, email, "Your AWS Admin password reset", body)
+	if loginURL != "" {
+		bodyLines = append(bodyLines, "Login: "+loginURL)
+	}
+	bodyLines = append(bodyLines, "Please log in and change it.")
+	body := strings.Join(bodyLines, "\n")
+	return utils.SendEmail(cfg, email, subject, body)
+}
+
+func buildLoginURL() string {
+	appBase := strings.TrimSpace(os.Getenv("APP_BASE_URL"))
+	if appBase == "" {
+		return ""
+	}
+	return strings.TrimRight(appBase, "/") + "/"
 }
 
 func parseLimit(value string, def int) int {

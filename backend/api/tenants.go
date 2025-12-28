@@ -6,13 +6,9 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD
 	"github.com/bertrandmartel/aws-admin/backend/auth"
 	"github.com/bertrandmartel/aws-admin/backend/middleware"
 	"github.com/bertrandmartel/aws-admin/backend/model"
-=======
-	"github.com/bertrandmartel/aws-admin/backend/middleware"
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 	"github.com/bertrandmartel/aws-admin/backend/store"
 	"github.com/bertrandmartel/aws-admin/backend/utils"
 	"github.com/labstack/echo/v4"
@@ -32,14 +28,11 @@ type AcceptInviteRequest struct {
 	Token string `json:"token"`
 }
 
-<<<<<<< HEAD
 type AcceptInvitePublicRequest struct {
 	Token    string `json:"token"`
 	Password string `json:"password"`
 }
 
-=======
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 func ListTenants(c echo.Context) error {
 	db := c.Get(middleware.ContextDB).(*store.DB)
 	userID := c.Get(middleware.ContextUserID).(string)
@@ -163,7 +156,6 @@ func AcceptInvite(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
 }
 
-<<<<<<< HEAD
 func AcceptInvitePublic(c echo.Context) error {
 	db := c.Get(middleware.ContextDB).(*store.DB)
 	cfg := c.Get(middleware.ContextConfig).(*model.Config)
@@ -236,8 +228,6 @@ func AcceptInvitePublic(c echo.Context) error {
 	})
 }
 
-=======
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 func SwitchTenant(c echo.Context) error {
 	db := c.Get(middleware.ContextDB).(*store.DB)
 	userID := c.Get(middleware.ContextUserID).(string)

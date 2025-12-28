@@ -30,7 +30,6 @@ type RefreshRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
-<<<<<<< HEAD
 type ForgotPasswordRequest struct {
 	Email string `json:"email"`
 }
@@ -40,8 +39,6 @@ type ResetPasswordRequest struct {
 	Password string `json:"password"`
 }
 
-=======
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 type AuthResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
@@ -307,7 +304,6 @@ func Me(c echo.Context) error {
 	})
 }
 
-<<<<<<< HEAD
 func ForgotPassword(c echo.Context) error {
 	db := c.Get(middleware.ContextDB).(*store.DB)
 	req := new(ForgotPasswordRequest)
@@ -375,8 +371,6 @@ func ResetPassword(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
 }
 
-=======
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
 func isEmailSuperAdmin(email string) bool {
 	if email == "" {
 		return false

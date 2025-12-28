@@ -41,12 +41,8 @@ export default {
     this.$store.dispatch('auth/verifyEmail', token)
       .then(() => {
         this.status = 'success'
-<<<<<<< HEAD
         this.message = 'Your email is verified. Redirecting...'
         this.$router.push({ path: '/welcome', query: { verified: '1' } })
-=======
-        this.message = 'Your email is verified. You can sign in now.'
->>>>>>> e0ac5ea8763b5bbbe5af1dffd73ebd9de417e8af
       })
       .catch(() => {
         this.status = 'error'
