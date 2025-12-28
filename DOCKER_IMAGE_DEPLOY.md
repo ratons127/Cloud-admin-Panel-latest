@@ -42,38 +42,41 @@ SMTP_FROM=you@example.com
 ## 3) Create `docker-compose.yml`
 
 ```yaml
-version: "3.8"
+  version: "3.8"
 
-services:
-  db:
-    image: postgres:16
-    container_name: cloud-admin-db
-    environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app_pass
-      POSTGRES_DB: app_db
-    volumes:
-      - cloud_admin_pgdata:/var/lib/postgresql/data
-    networks:
-      - cloud-admin-net
+  services:
+    db:
+      image: postgres:16
+      container_name: cloud-admin-db
+      environment:
+        POSTGRES_USER: app
+        POSTGRES_PASSWORD: app_pass
+        POSTGRES_DB: app_db
+      volumes:
+        - cloud_admin_pgdata:/var/lib/postgresql/data
+      networks:
+        - cloud-admin-net
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U app -d app_db"]
+        interval: 5s
+        timeout: 5s
+        retries: 10
 
-  app:
-    image: raton127/aws-admin_panel:latest
-    container_name: cloud-admin
-    depends_on:
-      - db
-    ports:
-      - "6006:6005"
-    env_file:
-      - .env
-    networks:
-      - cloud-admin-net
+    app:
+      image: raton127/aws-admin_panel:latest
+      container_name: cloud-admin
+      depends_on:
+        db:
+          condition: service_healthy
+      ports:
+        - "6006:6005"
+      env_file:
+        - .env
+      networks:
+    cloud_admin_pgdata:
 
-volumes:
-  cloud_admin_pgdata:
-
-networks:
-  cloud-admin-net:
+  networks:
+    cloud-admin-net:
 ```
 
 ## 4) Start the stack
