@@ -21,6 +21,13 @@ sudo usermod -aG docker $USER
 
 Log out and back in to apply group changes.
 
+## Docker Install 
+
+```
+curl -fsSL https://get.docker.com/ | sh
+
+```
+
 ### 2) Clone the repo
 
 ```bash
