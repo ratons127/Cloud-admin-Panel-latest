@@ -55,7 +55,7 @@ Required variables:
 - `SMTP_PASS`
 - `SMTP_FROM`
 
-Set `APP_ENV=production`.
+Set `APP_ENV=production` and update `APP_BASE_URL` to your public domain (example: `https://cloudsys24.com`).
 
 ### 4) Build and start
 
@@ -71,21 +71,24 @@ The app should be available on port `6006` by default (see `docker-compose.yml`)
 - Log in with a super admin user
 - Create a user and verify email delivery
 
-## Optional: Reverse Proxy (Nginx)
+## Optional: Reverse Proxy (Nginx + HTTPS)
 
 If you want HTTPS and a clean domain:
 
-1) Point your domain to the server.
-2) Install Nginx.
-3) Use a basic reverse proxy config:
+1) Point your domain to the server (A record for `cloudsys24.com` and optionally `www.cloudsys24.com`).
+2) Install Nginx and Certbot.
+3) Use this reverse proxy config:
 
 ```nginx
 server {
   listen 80;
-  server_name your-domain.com;
+  server_name cloudsys24.com www.cloudsys24.com;
 
   location / {
     proxy_pass http://127.0.0.1:6006;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -94,7 +97,47 @@ server {
 }
 ```
 
-Then use Certbot for HTTPS.
+Example commands (Ubuntu):
+
+```bash
+sudo apt update
+sudo apt install -y nginx certbot python3-certbot-nginx
+sudo ln -s /etc/nginx/sites-available/cloudsys24.com /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+sudo certbot --nginx -d cloudsys24.com -d www.cloudsys24.com
+```
+
+Update `APP_BASE_URL=https://cloudsys24.com` in `.env` after HTTPS is active.
+
+## Systemd Service (Auto-Start)
+
+Create `/etc/systemd/system/aws-admin.service`:
+
+```ini
+[Unit]
+Description=AWS Admin Dashboard (Docker Compose)
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/Cloud-admin-Panel-latest
+ExecStart=/usr/bin/docker compose up -d --build
+ExecStop=/usr/bin/docker compose down
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable aws-admin
+sudo systemctl start aws-admin
+```
 
 ## CI/CD (GitHub Actions + SSH)
 
