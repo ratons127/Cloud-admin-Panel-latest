@@ -6,6 +6,13 @@ Image:
 
 - `raton127/aws-admin_panel:latest`
 - `raton127/aws-admin_panel:v1.0.2`
+  
+## Docker Install 
+
+```
+curl -fsSL https://get.docker.com/ | sh
+
+```
 
 ## 1) Create a server directory
 
